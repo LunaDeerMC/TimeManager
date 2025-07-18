@@ -285,8 +285,16 @@ public class TimeManager {
         for (Map.Entry<UUID, Long> entry : new HashMap<>(playerTimes).entrySet()) {
             Player player = org.bukkit.Bukkit.getPlayer(entry.getKey());
             if (player != null && player.isOnline()) {
-                playerTimes.put(player.getUniqueId(), entry.getValue() + 1); // 增加时间，模拟时间流逝
-                sendTimePacket(player, entry.getValue());
+                // 检查玩家时间是否被冻结
+                if (!timeFrozen.getOrDefault(entry.getKey(), false)) {
+                    // 只有未冻结的玩家才更新时间
+                    long newTime = entry.getValue() + 1;
+                    playerTimes.put(player.getUniqueId(), newTime);
+                    sendTimePacket(player, newTime);
+                } else {
+                    // 冻结的玩家保持当前时间不变
+                    sendTimePacket(player, entry.getValue());
+                }
             } else {
                 cleanupPlayer(entry.getKey());
             }
@@ -333,4 +341,3 @@ public class TimeManager {
         return serverVersion;
     }
 }
-

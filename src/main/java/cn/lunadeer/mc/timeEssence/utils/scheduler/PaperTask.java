@@ -13,4 +13,9 @@ public class PaperTask implements CancellableTask {
     public void cancel() {
         task.cancel();
     }
+
+    @Override
+    public boolean isCancelled() {
+        return task.isCancelled();
+    }
 }

@@ -10,7 +10,7 @@ public class Configuration extends ConfigurationFile {
     public static boolean enableTimeCommand = true;
 
     // 时间更新间隔（tick，20 ticks = 1秒）
-    public static int timeUpdateInterval = 20;
+    public static int timeUpdateInterval = 5;
 
     // 是否在玩家加入时显示插件信息
     public static boolean showWelcomeMessage = true;

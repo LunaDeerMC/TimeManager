@@ -2,9 +2,9 @@ package cn.lunadeer.mc.timeEssence.manager;
 
 import cn.lunadeer.mc.timeEssence.Configuration;
 import cn.lunadeer.mc.timeEssence.utils.XLogger;
+import cn.lunadeer.mc.timeEssence.utils.scheduler.CancellableTask;
+import cn.lunadeer.mc.timeEssence.utils.scheduler.Scheduler;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -17,7 +17,7 @@ public class TimeManager {
     private static final Map<UUID, Long> playerTimes = new HashMap<>();
     private static final Map<UUID, Boolean> timeOverridden = new HashMap<>();
     private static final Map<UUID, Boolean> timeFrozen = new HashMap<>();
-    private static BukkitTask updateTask;
+    private static CancellableTask updateTask;
 
     // NMS相关的反射缓存 - 针对1.21.1+优化
     private static Class<?> craftPlayerClass;
@@ -119,8 +119,8 @@ public class TimeManager {
                 craftPlayerClass = Class.forName("org.bukkit.craftbukkit.entity.CraftPlayer");
             } catch (ClassNotFoundException e2) {
                 throw new ClassNotFoundException("Could not find CraftPlayer class. Tried: " +
-                    "org.bukkit.craftbukkit." + serverVersion + ".entity.CraftPlayer and " +
-                    "org.bukkit.craftbukkit.entity.CraftPlayer", e2);
+                        "org.bukkit.craftbukkit." + serverVersion + ".entity.CraftPlayer and " +
+                        "org.bukkit.craftbukkit.entity.CraftPlayer", e2);
             }
         }
 
@@ -269,84 +269,23 @@ public class TimeManager {
     }
 
     /**
-     * 启动时间更新任务 - Folia兼容版本
+     * 启动时间更新任务
      */
     public static void startUpdateTask() {
         if (updateTask != null && !updateTask.isCancelled()) {
             updateTask.cancel();
         }
-
-        // 检查是否为Folia服务器
-        boolean isFolia = isFoliaServer();
-        XLogger.debug("Detected server type: {0}", isFolia ? "Folia" : "Bukkit/Paper");
-
-        if (isFolia) {
-            // 使用Folia兼容的调度器 - 为每个玩家单独调度任务
-            startFoliaCompatibleTask();
-        } else {
-            // 使用传统的Bukkit调度器
-            updateTask = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    updatePlayerTimes();
-                }
-            }.runTaskTimer(cn.lunadeer.mc.timeEssence.TimeEssence.getInstance(), 0L, Configuration.timeUpdateInterval);
-        }
-
-        XLogger.debug("Time update task started with interval: {0} ticks", Configuration.timeUpdateInterval);
+        updateTask = Scheduler.runTaskRepeatAsync(TimeManager::updatePlayerTimes, 1L, 1L);
     }
 
     /**
-     * 检查是否为Folia服务器
-     */
-    private static boolean isFoliaServer() {
-        try {
-            // 尝试加载Folia特有的类
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    /**
-     * 启动Folia兼容的任务调度
-     */
-    private static void startFoliaCompatibleTask() {
-        // 在Folia中，我们不能使用传统的BukkitRunnable
-        // 改为使用事件驱动的方式来更新时间
-        XLogger.warn("Folia server detected - using event-driven time updates instead of scheduled tasks");
-
-        // 对于Folia，我们将在玩家操作时才发送时间数据包
-        // 这意味着时间更新将在玩家执行指令或其他操作时触发
-        updateTask = null; // 不使用定时任务
-
-        // 立即为所有在线玩家发送一次时间数据包
-        for (Map.Entry<UUID, Long> entry : new HashMap<>(playerTimes).entrySet()) {
-            Player player = org.bukkit.Bukkit.getPlayer(entry.getKey());
-            if (player != null && player.isOnline()) {
-                sendTimePacket(player, entry.getValue());
-            } else {
-                cleanupPlayer(entry.getKey());
-            }
-        }
-    }
-
-    /**
-     * 为特定玩家调度时间更新任务（Folia兼容）
-     */
-    private static void scheduleForPlayer(Player player, long time) {
-        // 在Folia中直接发送，不使用调度器
-        sendTimePacket(player, time);
-    }
-
-    /**
-     * 更新所有玩家的时间（传统Bukkit/Paper）
+     * 更新所有玩家的时间
      */
     private static void updatePlayerTimes() {
         for (Map.Entry<UUID, Long> entry : new HashMap<>(playerTimes).entrySet()) {
             Player player = org.bukkit.Bukkit.getPlayer(entry.getKey());
             if (player != null && player.isOnline()) {
+                playerTimes.put(player.getUniqueId(), entry.getValue() + 1); // 增加时间，模拟时间流逝
                 sendTimePacket(player, entry.getValue());
             } else {
                 cleanupPlayer(entry.getKey());

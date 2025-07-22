@@ -14,7 +14,6 @@ public final class TimeManager extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
         instance = this;
         new Notification(this);
         new XLogger(this);
@@ -29,7 +28,6 @@ public final class TimeManager extends JavaPlugin {
         }
         XLogger.setDebug(Configuration.debug);
 
-        // 注册指令
         if (Configuration.enableTimeCommand) {
             TimeCommand timeCommand = new TimeCommand();
             org.bukkit.command.PluginCommand timeCmd = getCommand("ptime");
@@ -42,7 +40,6 @@ public final class TimeManager extends JavaPlugin {
             }
         }
 
-        // 注册事件监听器
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         XLogger.info("Event listeners registered successfully");
 
@@ -51,7 +48,6 @@ public final class TimeManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
         XLogger.info("TimeManager plugin disabled");
     }
 

@@ -13,7 +13,6 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        // 发送欢迎消息（如果启用）
         if (Configuration.showWelcomeMessage && event.getPlayer().hasPermission("timeessence.use")) {
             String message = ChatColor.translateAlternateColorCodes('&', Configuration.welcomeMessage);
             event.getPlayer().sendMessage(message);
@@ -24,7 +23,6 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // 玩家离开时清理其时间数据
         TimeManager.cleanupPlayer(event.getPlayer().getUniqueId());
         XLogger.debug("Cleaned up time data for player {0}", event.getPlayer().getName());
     }

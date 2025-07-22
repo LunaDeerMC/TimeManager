@@ -1,12 +1,14 @@
-package cn.lunadeer.mc.timeEssence.commands;
+package cn.lunadeer.mc.timeManager.commands;
 
-import cn.lunadeer.mc.timeEssence.manager.TimeManager;
+import cn.lunadeer.mc.timeManager.manager.TimeManager;
+import cn.lunadeer.mc.timeManager.utils.Notification;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,17 +17,9 @@ import java.util.List;
 public class TimeCommand implements CommandExecutor, TabCompleter {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "This command can only be used by players!");
-            return true;
-        }
-
-        Player player = (Player) sender;
-
-        // 检查权限
-        if (!player.hasPermission("timeessence.use")) {
-            player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            Notification.error(sender, "This command can only be used by players!");
             return true;
         }
 
@@ -34,30 +28,31 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        switch (args[0].toLowerCase()) {
-            case "set":
-                return handleSetCommand(player, args);
-            case "reset":
-                return handleResetCommand(player);
-            case "freeze":
-                return handleFreezeCommand(player);
-            case "unfreeze":
-                return handleUnfreezeCommand(player);
-            case "info":
-                return handleInfoCommand(player);
-            case "help":
+        return switch (args[0].toLowerCase()) {
+            case "set" -> handleSetCommand(player, args);
+            case "reset" -> handleResetCommand(player);
+            case "freeze" -> handleFreezeCommand(player);
+            case "unfreeze" -> handleUnfreezeCommand(player);
+            case "info" -> handleInfoCommand(player);
+            case "help" -> {
                 sendHelpMessage(player);
-                return true;
-            default:
-                player.sendMessage(ChatColor.RED + "Unknown subcommand. Use /time help for help.");
-                return true;
-        }
+                yield true;
+            }
+            default -> {
+                Notification.error(sender, "Unknown subcommand. Use /ptime help for help.");
+                yield true;
+            }
+        };
     }
 
     private boolean handleSetCommand(Player player, String[] args) {
+        if (!player.hasPermission("ptime.set")) {
+            Notification.error(player, "You don't have permission to set your personal time!");
+            return true;
+        }
         if (args.length < 2) {
-            player.sendMessage(ChatColor.RED + "Usage: /time set <time>");
-            player.sendMessage(ChatColor.YELLOW + "Time can be: day, night, noon, midnight, sunrise, sunset, or a number (0-24000)");
+            Notification.error(player, "Usage: /ptime set <time>");
+            Notification.error(player, "Time can be: day, night, noon, midnight, sunrise, sunset, or a number (0-24000)");
             return true;
         }
 
@@ -66,41 +61,48 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
             // 尝试解析预设时间
             time = parseTimeString(args[1]);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.RED + "Invalid time format! Use: day, night, noon, midnight, sunrise, sunset, or a number (0-24000)");
+            Notification.error(player, "Invalid time format! Use: day, night, noon, midnight, sunrise, sunset, or a number (0-24000)");
             return true;
         } catch (IllegalArgumentException e) {
-            player.sendMessage(ChatColor.RED + e.getMessage());
+            Notification.error(player, e);
             return true;
         }
 
         TimeManager.setPlayerTime(player, time);
-        player.sendMessage(ChatColor.GREEN + "Your personal time has been set to " + formatTime(time) + " (" + time + " ticks)");
-
+        Notification.info(player, "our personal time has been set to {0} ({1} ticks)", formatTime(time), time);
         return true;
     }
 
     private boolean handleResetCommand(Player player) {
         if (!TimeManager.isTimeOverridden(player)) {
-            player.sendMessage(ChatColor.YELLOW + "Your time is already synchronized with the server.");
+            Notification.warn(player, "Your time is already synchronized with the server.");
             return true;
         }
 
         TimeManager.resetPlayerTime(player);
         long serverTime = player.getWorld().getTime();
-        player.sendMessage(ChatColor.GREEN + "Your time has been reset to server time: " + formatTime(serverTime) + " (" + serverTime + " ticks)");
+        Notification.info(player, "Your time has been reset to server time: {0} ({1} ticks)", formatTime(serverTime), serverTime);
 
         return true;
     }
 
     private boolean handleFreezeCommand(Player player) {
+        if (!player.hasPermission("ptime.freeze")) {
+            Notification.error(player, "You don't have permission to set your personal time!");
+            return true;
+        }
         TimeManager.freezePlayerTime(player);
-        player.sendMessage(ChatColor.GREEN + "Your time has been frozen.");
+        Notification.info(player, "Your personal time has been frozen.");
         return true;
     }
 
     private boolean handleUnfreezeCommand(Player player) {
+        if (!player.hasPermission("ptime.freeze")) {
+            Notification.error(player, "You don't have permission to set your personal time!");
+            return true;
+        }
         TimeManager.unfreezePlayerTime(player);
-        player.sendMessage(ChatColor.GREEN + "Your time has been unfrozen.");
+        Notification.info(player, "Your personal time has been unfrozen.");
         return true;
     }
 
@@ -133,13 +135,13 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelpMessage(Player player) {
-        player.sendMessage(ChatColor.AQUA + "=== TimeEssence Commands ===");
-        player.sendMessage(ChatColor.YELLOW + "/time set <time>" + ChatColor.WHITE + " - Set your personal time");
-        player.sendMessage(ChatColor.YELLOW + "/time reset" + ChatColor.WHITE + " - Reset to server time");
-        player.sendMessage(ChatColor.YELLOW + "/time freeze" + ChatColor.WHITE + " - Freeze your personal time");
-        player.sendMessage(ChatColor.YELLOW + "/time unfreeze" + ChatColor.WHITE + " - Unfreeze your personal time");
-        player.sendMessage(ChatColor.YELLOW + "/time info" + ChatColor.WHITE + " - Show time information");
-        player.sendMessage(ChatColor.YELLOW + "/time help" + ChatColor.WHITE + " - Show this help message");
+        player.sendMessage(ChatColor.AQUA + "=== TimeManager Commands ===");
+        player.sendMessage(ChatColor.YELLOW + "/ptime set <time>" + ChatColor.WHITE + " - Set your personal time");
+        player.sendMessage(ChatColor.YELLOW + "/ptime reset" + ChatColor.WHITE + " - Reset to server time");
+        player.sendMessage(ChatColor.YELLOW + "/ptime freeze" + ChatColor.WHITE + " - Freeze your personal time");
+        player.sendMessage(ChatColor.YELLOW + "/ptime unfreeze" + ChatColor.WHITE + " - Unfreeze your personal time");
+        player.sendMessage(ChatColor.YELLOW + "/ptime info" + ChatColor.WHITE + " - Show time information");
+        player.sendMessage(ChatColor.YELLOW + "/ptime help" + ChatColor.WHITE + " - Show this help message");
         player.sendMessage(ChatColor.GRAY + "Available times: day, night, noon, midnight, sunrise, sunset, or 0-24000");
     }
 

@@ -1,4 +1,4 @@
-package cn.lunadeer.mc.timeEssence.utils.configuration;
+package cn.lunadeer.mc.timeManager.utils.configuration;
 
 /**
  * Marker interface for unique sections of a configuration.

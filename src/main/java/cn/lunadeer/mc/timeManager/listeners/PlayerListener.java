@@ -1,8 +1,8 @@
-package cn.lunadeer.mc.timeEssence.listeners;
+package cn.lunadeer.mc.timeManager.listeners;
 
-import cn.lunadeer.mc.timeEssence.Configuration;
-import cn.lunadeer.mc.timeEssence.manager.TimeManager;
-import cn.lunadeer.mc.timeEssence.utils.XLogger;
+import cn.lunadeer.mc.timeManager.Configuration;
+import cn.lunadeer.mc.timeManager.manager.TimeManager;
+import cn.lunadeer.mc.timeManager.utils.XLogger;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

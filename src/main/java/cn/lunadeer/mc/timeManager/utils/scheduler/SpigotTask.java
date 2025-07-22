@@ -1,4 +1,4 @@
-package cn.lunadeer.mc.timeEssence.utils.scheduler;
+package cn.lunadeer.mc.timeManager.utils.scheduler;
 
 import org.bukkit.scheduler.BukkitTask;
 

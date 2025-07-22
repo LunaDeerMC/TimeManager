@@ -1,4 +1,4 @@
-package cn.lunadeer.mc.timeEssence.utils;
+package cn.lunadeer.mc.timeManager.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;

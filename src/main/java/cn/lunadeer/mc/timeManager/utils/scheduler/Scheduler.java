@@ -1,10 +1,10 @@
-package cn.lunadeer.mc.timeEssence.utils.scheduler;
+package cn.lunadeer.mc.timeManager.utils.scheduler;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.TimeUnit;
 
-import static cn.lunadeer.mc.timeEssence.utils.Misc.isPaper;
+import static cn.lunadeer.mc.timeManager.utils.Misc.isPaper;
 
 public class Scheduler {
     public static Scheduler instance;

@@ -1,21 +1,21 @@
-name: TimeEssence
+name: TimeManager
 version: '0.1.0'
-main: cn.lunadeer.mc.timeEssence.TimeEssence
+main: cn.lunadeer.mc.timeManager.TimeManager
 api-version: '1.21'
 author: lunadeer
 description: A plugin that allows players to modify their personal time using packet manipulation
 folia-supported: true
 
 commands:
-  time:
+  ptime:
     description: Manage your personal time
-    usage: /time <set|reset|freeze|unfreeze|info|help> [time]
-    aliases: [ptime, personaltime]
+    usage: /ptime <set|reset|freeze|unfreeze|info|help> [time]
 
 permissions:
-  timeessence.use:
-    description: Allows use of time commands
+  ptime.set:
+    description: Allows use set command
     default: true
-  timeessence.admin:
-    description: Administrative permissions
-    default: op
+  ptime.freeze:
+    description: Allows use freeze/unfreeze commands
+    default: true
+

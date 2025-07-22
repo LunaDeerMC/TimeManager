@@ -1,6 +1,6 @@
-package cn.lunadeer.mc.timeEssence.manager;
+package cn.lunadeer.mc.timeManager.manager;
 
-import cn.lunadeer.mc.timeEssence.utils.XLogger;
+import cn.lunadeer.mc.timeManager.utils.XLogger;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;

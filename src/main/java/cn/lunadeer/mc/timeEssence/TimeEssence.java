@@ -1,11 +1,10 @@
 package cn.lunadeer.mc.timeEssence;
 
-import cn.lunadeer.mc.timeEssence.utils.configuration.ConfigurationManager;
-import cn.lunadeer.mc.timeEssence.utils.scheduler.Scheduler;
-import cn.lunadeer.mc.timeEssence.utils.XLogger;
 import cn.lunadeer.mc.timeEssence.commands.TimeCommand;
 import cn.lunadeer.mc.timeEssence.listeners.PlayerListener;
-import cn.lunadeer.mc.timeEssence.manager.TimeManager;
+import cn.lunadeer.mc.timeEssence.utils.XLogger;
+import cn.lunadeer.mc.timeEssence.utils.configuration.ConfigurationManager;
+import cn.lunadeer.mc.timeEssence.utils.scheduler.Scheduler;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -45,17 +44,12 @@ public final class TimeEssence extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         XLogger.info("Event listeners registered successfully");
 
-        // 启动时间管理器
-        TimeManager.startUpdateTask();
-        XLogger.info("TimeManager started successfully");
-
         XLogger.info("TimeEssence plugin enabled successfully!");
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        TimeManager.stopUpdateTask();
         XLogger.info("TimeEssence plugin disabled");
     }
 

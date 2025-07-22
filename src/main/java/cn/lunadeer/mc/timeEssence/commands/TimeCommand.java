@@ -1,7 +1,6 @@
 package cn.lunadeer.mc.timeEssence.commands;
 
 import cn.lunadeer.mc.timeEssence.manager.TimeManager;
-import cn.lunadeer.mc.timeEssence.utils.XLogger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -109,7 +108,7 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
         long serverTime = player.getWorld().getTime();
 
         if (TimeManager.isTimeOverridden(player)) {
-            Long playerTime = TimeManager.getPlayerTime(player);
+            Long playerTime = player.getPlayerTime();
             boolean isFrozen = TimeManager.isTimeFrozen(player);
 
             player.sendMessage(ChatColor.AQUA + "=== Time Information ===");
@@ -147,6 +146,7 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
     private long parseTimeString(String timeStr) throws NumberFormatException, IllegalArgumentException {
         switch (timeStr.toLowerCase()) {
             case "day":
+                return 1000L; // 6:00 AM in Minecraft time
             case "sunrise":
                 return 0L;
             case "noon":
@@ -154,6 +154,7 @@ public class TimeCommand implements CommandExecutor, TabCompleter {
             case "sunset":
                 return 12000L;
             case "night":
+                return 14000L; // 8:00 PM in Minecraft time
             case "midnight":
                 return 18000L;
             default:

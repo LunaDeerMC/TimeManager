@@ -23,7 +23,8 @@ public class TimeManager {
         long serverTime = player.getWorld().getTime();
         serverTime = serverTime % 24000; // 确保时间在0-23999范围内
 
-        player.setPlayerTime(serverTime - time, true);
+        long offset = time - serverTime;
+        player.setPlayerTime(offset, true);
         XLogger.debug("Set player {0} time to {1}", player.getName(), time);
     }
 
